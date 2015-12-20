@@ -44,10 +44,10 @@ void fade_load(uint8_t index, uint16_t channel, uint8_t target, uint16_t time) {
     fade.last_frame = 0;
     fade.channel = channel;
     fade.flags = 0;
-    fade.done = false;
+//    fade.done = false;
     
     if (index < FADE_MAX_FADES) {                          // Make sure that index exists
-        fades[index] = fades;
+//        fades[index] = fades;
         fades_loaded |= (1<<index);                        // Mark fade as loaded
     }
 }

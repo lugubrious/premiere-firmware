@@ -153,10 +153,14 @@ void lcd_write_int(int d, uint8_t digits, int8_t location) {
         string[i] = ' ';
     }
     itoa(d, string, 10);                        // Convert d to string (base ten)
-    if (d < 100) {
-        string[2] = string[1];
-        string[1] = string[0];
-        string[0] = ' ';
+    bool replacing = false;
+    for (int i = 0; i < digits; i++) {
+        if  (replacing) {
+            string[i] = ' ';
+        } else if (string[i] == 0) {
+            replacing = true;
+            i--;
+        }
     }
     lcd_write_string(string, location);         // Write the string
 }

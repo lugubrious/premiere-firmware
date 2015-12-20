@@ -20,11 +20,10 @@
 #include "network.h"
 
 // MARK: Constants
-// test commit
+#define ADC_RATE        8                           // Eight millis between conversions allows each analog in to be polled about 15 times/sec
 
 // MARK: Function prototypes
 void main_loop(void);
-
 
 // MARK: Variables Definitions
 volatile uint32_t millis, last_beat;
@@ -88,6 +87,7 @@ void init_timers(void) {
 void init_adc(void) {
     ADMUX |= (1<<REFS0)|(1 << ADLAR);               // Refrence = AVCC with external capacitor at AREF pin, left adjusted
     ADCSRA |= (1<<ADEN)|(1<<ADIE)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0); // Enable ADC and set prescaler to 128 (125KHz), enable ADC interupts
+    DIDR0 |= 0xFF;                                  // Disable digital inputs on analog pins to save power
     ADMUX &= 0xF8;                                  // Make sure that channel 0 is selected
 }
 
@@ -127,6 +127,8 @@ int main(void) {
     animation_load(loading_animation, 0);
     animation_start(0);
     
+    lcd_write_string("Welcome!", LCD_LINE_TWO_START);
+    
 //    network_init();
     
     for (;;) {
@@ -145,7 +147,7 @@ void main_loop(void) {
     // Run main loop funcions for various systems
     dmx_service();
     animation_service();
-    
+
     // Get the latest data from the buttons
     if (shift_in()) {
         buttons_sections_dirty |= (1<<BUTTON_KEYS_DIRTY);
@@ -167,13 +169,14 @@ void main_loop(void) {
         buttons_bump_dirty &= ~((uint32_t)1<<BUMP_ONE_ID);
     }
     
-    lcd_write_int(shift_in_buffer, 12, LCD_LINE_TWO_START);
-    
     // Check for dirty flags/new input and take any needed actions
-    if ((adc_is_dirty & (1<<0))) {
-        lcd_write_int(adc_values[0], 3, LCD_LINE_ONE_START + 13);
-        lcd_write_percentage(adc_values[0], LCD_LINE_ONE_START + 11);
-        adc_is_dirty &= ~(1<0);
+    static unsigned int faderUpdates;
+    if ((adc_is_dirty & (1<<7))) {
+        faderUpdates++;
+        lcd_write_int(adc_values[7], 3, LCD_LINE_ONE_START + 13);
+        lcd_write_int(faderUpdates, 6, LCD_LINE_TWO_START + 10);
+        lcd_write_percentage(adc_values[7], LCD_LINE_ONE_START + 11);
+        adc_is_dirty &= ~(1<<7);
     }
     
     // Check for new packets
@@ -182,7 +185,6 @@ void main_loop(void) {
     // Update outputs
     shift_out();
 }
-
 
 // MARK: Interupt Service Routines
 
@@ -193,15 +195,17 @@ ISR (TIMER0_COMPA_vect) {                           // timer0 overflow (called e
 ISR (ADC_vect) {                                    // ADC conversion complete
     uint8_t value = ADCH;                           // Get ADC value. The value is left adjusted for easy 8-bit reading(we don't have to shift it over). We just drop that last two bits to avoid ripple as we really don't need ten bit precision.
     
-    if (value != adc_values[adc_current_chan]) {    // Check if value has changed sicne last read
+    if (value != adc_values[adc_current_chan]) {    // Check if value has changed since last read
         adc_is_dirty |= (1<<adc_current_chan);      // If the value has changed set a flag so that the change can be addressed in the next loop
     }
     
     adc_values[adc_current_chan] = value;
-    
+   
     // Get ready for next conversion
     adc_current_chan++;                             // Increment ADC channel
-    adc_current_chan &= 7;                          // Make sure that ADC channel is less than 8
+    adc_current_chan &= 7;                          // Make sure ADC channel only uses first 3 bits (less than 8)
+    ADMUX &= 0xF8;                                  // Set adc channel to 0
+    ADMUX |= adc_current_chan;                      // Set adc channel
     ADCSRA |= (1<<ADSC);                            // Start the next ADC conversion
 }
 

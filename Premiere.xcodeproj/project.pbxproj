@@ -23,6 +23,7 @@
 		BC1CB1511BF44F4D0092EEF6 /* submasters.c in Sources */ = {isa = PBXBuildFile; fileRef = BC1CB14F1BF44F4D0092EEF6 /* submasters.c */; };
 		BC2275F51BE7B3D200757510 /* buttons.c in Sources */ = {isa = PBXBuildFile; fileRef = BC2275F31BE7B3D200757510 /* buttons.c */; };
 		BC4055171BFA32BE00884645 /* fade.c in Sources */ = {isa = PBXBuildFile; fileRef = BC4055151BFA32BE00884645 /* fade.c */; };
+		BC5C2B4A1C25D04500B16077 /* strings.c in Sources */ = {isa = PBXBuildFile; fileRef = BC5C2B491C25D04500B16077 /* strings.c */; };
 		BC9EEA821BBE07150053C09C /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BC9EEA811BBE07150053C09C /* main.c */; };
 		BC9EEA851BBE07150053C09C /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = BC9EEA841BBE07150053C09C /* Makefile */; };
 		BC9EEA991BBE07400053C09C /* shift.c in Sources */ = {isa = PBXBuildFile; fileRef = BC9EEA981BBE07400053C09C /* shift.c */; };
@@ -70,6 +71,7 @@
 		BC2275F41BE7B3D200757510 /* buttons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buttons.h; sourceTree = "<group>"; };
 		BC4055151BFA32BE00884645 /* fade.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fade.c; sourceTree = "<group>"; };
 		BC4055161BFA32BE00884645 /* fade.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fade.h; sourceTree = "<group>"; };
+		BC5C2B491C25D04500B16077 /* strings.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = strings.c; sourceTree = "<group>"; };
 		BC7EE2891BF8FEBA00FBB11C /* lighting.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lighting.h; sourceTree = "<group>"; };
 		BC9EEA7E1BBE07150053C09C /* Index */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Index; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC9EEA811BBE07150053C09C /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
@@ -201,6 +203,7 @@
 			isa = PBXGroup;
 			children = (
 				BC9EEAD31BC41F080053C09C /* strings.h */,
+				BC5C2B491C25D04500B16077 /* strings.c */,
 				BC1E98B81BD437CD00FA2773 /* font.h */,
 				BCB8CFC81BDFAA7100F3AD73 /* animation.h */,
 				BCB8CFC71BDFAA7100F3AD73 /* animation.c */,
@@ -368,6 +371,7 @@
 				BC1CB13F1BEECAA40092EEF6 /* ethernet.c in Sources */,
 				BC1CB1411BEECAA40092EEF6 /* tcp.c in Sources */,
 				BC2275F51BE7B3D200757510 /* buttons.c in Sources */,
+				BC5C2B4A1C25D04500B16077 /* strings.c in Sources */,
 				BC1CB14A1BEEE25B0092EEF6 /* spi.c in Sources */,
 				BC9EEAA01BBE20A50053C09C /* dmx.c in Sources */,
 				BC16EB291BD0735D004EEEAF /* twimaster.c in Sources */,
