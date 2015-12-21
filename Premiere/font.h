@@ -34,7 +34,7 @@ const uint8_t FONT[8][8] = {
     {0, 0, 0, 0,31,31,31,31},   // Char 5: Half filled
     {0, 0, 0,31,31,31,31,31},   // Char 6: Five rows filled
     {0, 0,31,31,31,31,31,31},   // Char 7: All but two rows filled
-    {0,31,31,31,31,31,31,31}    // Char 8: All but one rwo filled
+    {0,31,31,31,31,31,31,31}    // Char 8: All but one row filled
 };
 
 const uint8_t FONT_PERCENTAGE_INDICATOR[9] = {254, 2, 3, 4, 5, 6, 7, 8, 255}; // 254 = empty, 255 = full

@@ -8,19 +8,11 @@
 
 #include <avr/pgmspace.h>
 
-
 #ifndef Strings_h
 #define Strings_h
 
 #define STRING_BUTTONS_STANDARD     "Rec Del  Sub Cue"
 #define STRING_BUTTONS_INTELIGENT   "Clor Pos Gob Bem"
-
-//                Line 1:                2:                end
-//const char screen_0[] PROGMEM = "Welcome to Premiere!";
-//const char screen_1[] PROGMEM = "String 2";
-//const char screen_2[] PROGMEM = "String 3";
-//const char screen_3[] PROGMEM = "String 4";
-//const char screen_4[] PROGMEM = "String 5";
 
 #define STRING_HOSTNAME             "Premiere"
 
