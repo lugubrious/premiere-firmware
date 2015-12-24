@@ -26,7 +26,6 @@ void lcd_init (void) {
     
     lcd_backlight_mask = (1<<LCD_BACKLIGHT_PIN); // Backlight is on by default
     
-    
     // I'm not quite sure why the lcd has to be set to 4 bits three times, but it doesn't work an other way
     
     // TODO: Find out what is happenng here
@@ -127,7 +126,6 @@ void lcd_write_nibble(uint8_t value, uint8_t mode) {
 // TODO: Find a way to recreate this function without busy waiting
 void lcd_write_raw_byte (uint8_t data) {
     // TODO: Check if I actually need to use start_wait, or if start then rep_start will work
-//    i2c_start_wait((0x27<<1) + I2C_WRITE); // Start talking to the I2C device
     i2c_start((0x27<<1) + I2C_WRITE);
     // I have no idea why the address has to be bit shifted left, which is why I spent 3 (explitive deleted) days debugging the I2C output code before copying the bit shifting from some example code -_- But now it works, and I can sleep *sigh*
     
@@ -154,7 +152,7 @@ void lcd_write_int(int d, uint8_t digits, int8_t location) {
     }
     itoa(d, string, 10);                        // Convert d to string (base ten)
     bool replacing = false;
-    for (int i = 0; i < digits; i++) {
+    for (int i = 0; i < digits; i++) {          // Make sure there are no extra trailing zeros
         if  (replacing) {
             string[i] = ' ';
         } else if (string[i] == 0) {
@@ -162,6 +160,7 @@ void lcd_write_int(int d, uint8_t digits, int8_t location) {
             i--;
         }
     }
+    string[digits] = 0;                         // Make sure that string is null terminated
     lcd_write_string(string, location);         // Write the string
 }
 
@@ -169,7 +168,6 @@ void lcd_write_percentage(uint8_t byte, int8_t location) {
     uint8_t step = ((uint16_t)byte + 31) / 32;  // Convert to value beetween zero and eight (inclusive)
     lcd_write_char(FONT_PERCENTAGE_INDICATOR[step], location);
 }
-
 
 void lcd_write_string(const char* c, int8_t location) {
     uint8_t length = strlen(c);                 // Get length of string

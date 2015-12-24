@@ -5,9 +5,7 @@
 //  Created by Samuel Dewan on 2015-10-01.
 //  Copyright © 2015 Samuel Dewan. All rights reserved.
 //
-//  TWI code based the application note "Using the TWI module as I2C master" publishet by Atmel
 //  HD44780 display driver commands refrenced from http://www.ekenrooi.net/lcd/lcd.shtml
-//
 //
 
 // TODO: Investigate feasibility/benifits of reimplementing I2C I/O as interupt driven.

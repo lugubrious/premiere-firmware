@@ -72,6 +72,7 @@
 		BC4055151BFA32BE00884645 /* fade.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fade.c; sourceTree = "<group>"; };
 		BC4055161BFA32BE00884645 /* fade.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fade.h; sourceTree = "<group>"; };
 		BC5C2B491C25D04500B16077 /* strings.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = strings.c; sourceTree = "<group>"; };
+		BC5D9C4A1C2A404F00E4DB6A /* strings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = strings.h; sourceTree = "<group>"; };
 		BC7EE2891BF8FEBA00FBB11C /* lighting.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lighting.h; sourceTree = "<group>"; };
 		BC9EEA7E1BBE07150053C09C /* Index */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Index; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC9EEA811BBE07150053C09C /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
@@ -83,7 +84,6 @@
 		BC9EEA9C1BBE20820053C09C /* lcd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lcd.h; sourceTree = "<group>"; };
 		BC9EEA9E1BBE20A50053C09C /* dmx.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dmx.c; sourceTree = "<group>"; };
 		BC9EEA9F1BBE20A50053C09C /* dmx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dmx.h; sourceTree = "<group>"; };
-		BC9EEAD31BC41F080053C09C /* strings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = strings.h; sourceTree = "<group>"; };
 		BCB8CFC71BDFAA7100F3AD73 /* animation.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = animation.c; sourceTree = "<group>"; };
 		BCB8CFC81BDFAA7100F3AD73 /* animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animation.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -202,7 +202,7 @@
 		BC9EEACF1BC41B080053C09C /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				BC9EEAD31BC41F080053C09C /* strings.h */,
+				BC5D9C4A1C2A404F00E4DB6A /* strings.h */,
 				BC5C2B491C25D04500B16077 /* strings.c */,
 				BC1E98B81BD437CD00FA2773 /* font.h */,
 				BCB8CFC81BDFAA7100F3AD73 /* animation.h */,

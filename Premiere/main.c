@@ -19,18 +19,16 @@
 #include "buttons.h"
 #include "network.h"
 
-// MARK: Constants
-#define ADC_RATE        8                           // Eight millis between conversions allows each analog in to be polled about 15 times/sec
-
 // MARK: Function prototypes
 void main_loop(void);
+uint8_t adcs_are_dirty(void);
 
 // MARK: Variables Definitions
 volatile uint32_t millis, last_beat;
 static volatile uint32_t key_go_last_pressed, key_stop_last_pressed;
 
-static volatile uint8_t bump_button_is_dirty, adc_current_chan, adc_is_dirty = 0xFF;
-static volatile uint8_t adc_values[8];
+static volatile uint8_t bump_button_is_dirty, adc_current_chan;
+static volatile uint8_t adc_values[8], prev_adc_values[8];
 
 // MARK: Funciton definitions
 void init_io(void) {
@@ -81,7 +79,7 @@ void init_timers(void) {
     TCCR0A |= (1 << WGM01);                         // Set the Timer Mode to CTC
     OCR0A = 250;                                    // Set the value to count to 250 (1 millisecond at 16Mhz where prescaler = 64)
     TIMSK0 |= (1 << OCIE0A);                        // Set the ISR COMPA vector
-    TCCR0B |= (1 << CS01) | (1 << CS00);            // set prescaler to 8 and start timer 0
+    TCCR0B |= (1 << CS01) | (1 << CS00);            // set prescaler to 64 and start timer 0
 }
 
 void init_adc(void) {
@@ -123,11 +121,13 @@ int main(void) {
     shift_out();                                    // Clear the shift registers (they start in an undifined state, so some LEDs are probably on)
 #endif
     
-    struct Animation loading_animation = animation_create_new(ANIMATION_LOADING_LENGTH, ANIMATION_LOADING_FRAMERATE, LCD_LINE_ONE_START, ANIMATION_LOADING_CHARS);
-    animation_load(loading_animation, 0);
-    animation_start(0);
+//    struct Animation loading_animation = animation_create_new(ANIMATION_LOADING_LENGTH, ANIMATION_LOADING_FRAMERATE, LCD_LINE_ONE_START, ANIMATION_LOADING_CHARS);
+//    animation_load(loading_animation, 0);
+//    animation_start(0);
     
-    lcd_write_string("Welcome!", LCD_LINE_TWO_START);
+    char buffer[18];
+    strcpy_P(buffer, (PGM_P)pgm_read_word(&(strings_main_menus[0])));   // Get string from program memory. Uses pgm_read_word to get a pointer to the string in program space
+    lcd_write_string(buffer, LCD_LINE_ONE_START);
     
 //    network_init();
     
@@ -153,7 +153,7 @@ void main_loop(void) {
         buttons_sections_dirty |= (1<<BUTTON_KEYS_DIRTY);
     }
     button_service();
-
+    
     if (buttons_keypad_dirty & ((uint32_t)1<<KEY_1_ID)) {
         shift_out_buffer ^= (1<<15);
         buttons_keypad_dirty &= ~((uint32_t)1<<KEY_1_ID);
@@ -170,13 +170,15 @@ void main_loop(void) {
     }
     
     // Check for dirty flags/new input and take any needed actions
-    static unsigned int faderUpdates;
-    if ((adc_is_dirty & (1<<7))) {
-        faderUpdates++;
-        lcd_write_int(adc_values[7], 3, LCD_LINE_ONE_START + 13);
-        lcd_write_int(faderUpdates, 6, LCD_LINE_TWO_START + 10);
-        lcd_write_percentage(adc_values[7], LCD_LINE_ONE_START + 11);
-        adc_is_dirty &= ~(1<<7);
+    uint8_t adc_is_dirty = adcs_are_dirty();
+    static unsigned int fader_updates;
+    
+    if (adc_is_dirty & (1<<7)) {
+        fader_updates++;
+        lcd_write_int(adc_values[7], 3, LCD_LINE_ONE_START + 11);
+        lcd_write_percentage(adc_values[7], LCD_LINE_ONE_START + 15);
+        
+        lcd_write_int(fader_updates, 6, LCD_LINE_TWO_START + 10);
     }
     
     // Check for new packets
@@ -184,23 +186,38 @@ void main_loop(void) {
     
     // Update outputs
     shift_out();
+    
+//    static unsigned int loops;
+//    loops++;
+//    lcd_write_int(loops / (millis / 1000), 6, LCD_LINE_TWO_START + 10);
+}
+
+uint8_t adcs_are_dirty (void) {
+    static bool not_first_run;                      // Keep track of the first run since when the program first runs the current and prev values will probably be 0, but we want to make sure that anything involving the adc is initilzed
+    if (__builtin_expect(!not_first_run, 0)) {      // __builtin_expect tells the branch predictor that we expect the outcome of !not_first_run to be 0, as it will be in everycase except for the first run
+        not_first_run = true;
+        return 0xFF;
+    } else {
+        uint8_t ret = 0;
+        for (int i = 0; i < 8; i++) {
+            ret |= ((prev_adc_values[i] != adc_values[i]) << i);
+            prev_adc_values[i] = adc_values[i];
+        }
+        return ret;
+    }
 }
 
 // MARK: Interupt Service Routines
 
-ISR (TIMER0_COMPA_vect) {                           // timer0 overflow (called every 200 microseconds)
+ISR (TIMER0_COMPA_vect) {                           // timer0 comp (called every millisecond)
     millis++;
 }
 
 ISR (ADC_vect) {                                    // ADC conversion complete
     uint8_t value = ADCH;                           // Get ADC value. The value is left adjusted for easy 8-bit reading(we don't have to shift it over). We just drop that last two bits to avoid ripple as we really don't need ten bit precision.
-    
-    if (value != adc_values[adc_current_chan]) {    // Check if value has changed since last read
-        adc_is_dirty |= (1<<adc_current_chan);      // If the value has changed set a flag so that the change can be addressed in the next loop
-    }
-    
+
     adc_values[adc_current_chan] = value;
-   
+    
     // Get ready for next conversion
     adc_current_chan++;                             // Increment ADC channel
     adc_current_chan &= 7;                          // Make sure ADC channel only uses first 3 bits (less than 8)
