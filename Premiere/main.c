@@ -9,6 +9,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#include "stdlib.h"
+
 #include "global.h"
 #include "pindefinitions.h"
 #include "shift.h"
@@ -19,16 +21,19 @@
 #include "buttons.h"
 #include "network.h"
 
+#include "./libethernet/ethernet.h"
+#include "./libethernet/enc28j60.h"
+
 // MARK: Function prototypes
 void main_loop(void);
 uint8_t adcs_are_dirty(void);
 
 // MARK: Variables Definitions
 volatile uint32_t millis, last_beat;
-static volatile uint32_t key_go_last_pressed, key_stop_last_pressed;
 
-static volatile uint8_t bump_button_is_dirty, adc_current_chan;
-static volatile uint8_t adc_values[8], prev_adc_values[8];
+static volatile uint8_t adc_current_chan;
+static volatile uint8_t prev_adc_values[8];
+volatile uint8_t adc_values[8];
 
 // MARK: Funciton definitions
 void init_io(void) {
@@ -104,7 +109,7 @@ int main(void) {
     dmxInit_universe_one();                         // Initialize universe one
     dmx_init_universe_two();                        // Initialize universe two
     
-    lcd_init();                                     // Initilize the lcd with the default settings in lcd.c (which are conveniantly the settings we want~ I wonder how that happend?)
+    lcd_init();                                     // Initilize the lcd with the default settings in lcd.c (which are conveniantly the settings we want)
     
     sei();                                          // Enable interupts
     
@@ -125,11 +130,26 @@ int main(void) {
 //    animation_load(loading_animation, 0);
 //    animation_start(0);
     
+    shift_out();
+    
+    lcd_write_string("Network Setup...", LCD_LINE_ONE_START);
+    
+    network_init();
+    
+    // Write the initial menu to the display
     char buffer[18];
     strcpy_P(buffer, (PGM_P)pgm_read_word(&(strings_main_menus[0])));   // Get string from program memory. Uses pgm_read_word to get a pointer to the string in program space
     lcd_write_string(buffer, LCD_LINE_ONE_START);
     
-//    network_init();
+    uint8_t ip[4];
+    network_get_ip_addr(ip);
+    lcd_write_int(ip[0], 3, LCD_LINE_ONE_START);
+    lcd_write_char('.', LCD_LINE_ONE_START + 3);
+    lcd_write_int(ip[1], 3, LCD_LINE_ONE_START + 4);
+    lcd_write_char('.', LCD_LINE_ONE_START + 7);
+    lcd_write_int(ip[2], 3, LCD_LINE_ONE_START + 8);
+    lcd_write_char('.', LCD_LINE_ONE_START + 11);
+    lcd_write_int(ip[3], 3, LCD_LINE_ONE_START + 12);
     
     for (;;) {
         main_loop();                                // Execute main loop forevermore
@@ -139,10 +159,10 @@ int main(void) {
 }
 
 void main_loop(void) {
-//    if ((millis - last_beat) >= 1000) {
-//        last_beat = millis;
-//        shift_out_buffer ^= (1<<8);
-//    }
+    if ((millis - last_beat) >= 1000) {
+        last_beat = millis;
+        shift_out_buffer ^= (1<<LED_BUMP_EIGHT_ID);
+    }
 
     // Run main loop funcions for various systems
     dmx_service();
@@ -155,34 +175,35 @@ void main_loop(void) {
     button_service();
     
     if (buttons_keypad_dirty & ((uint32_t)1<<KEY_1_ID)) {
-        shift_out_buffer ^= (1<<15);
+//        shift_out_buffer ^= (1<<15);
         buttons_keypad_dirty &= ~((uint32_t)1<<KEY_1_ID);
     }
     
     if (buttons_keypad_dirty & ((uint32_t)1<<KEY_GO_ID)) {
-        shift_out_buffer ^= (1<<14);
+//        shift_out_buffer ^= (1<<14);
         buttons_keypad_dirty &= ~((uint32_t)1<<KEY_GO_ID);
     }
 
     if (buttons_bump_dirty & ((uint32_t)1<<BUMP_ONE_ID)) {
-        shift_out_buffer ^= (1<<13);
+//        shift_out_buffer ^= (1<<13);
         buttons_bump_dirty &= ~((uint32_t)1<<BUMP_ONE_ID);
     }
     
     // Check for dirty flags/new input and take any needed actions
-    uint8_t adc_is_dirty = adcs_are_dirty();
+    /*uint8_t adc_is_dirty = adcs_are_dirty();
     static unsigned int fader_updates;
+
     
     if (adc_is_dirty & (1<<7)) {
         fader_updates++;
-        lcd_write_int(adc_values[7], 3, LCD_LINE_ONE_START + 11);
-        lcd_write_percentage(adc_values[7], LCD_LINE_ONE_START + 15);
+        lcd_write_int(adc_values[7], 3, LCD_LINE_TWO_START);
+        lcd_write_percentage(adc_values[7], LCD_LINE_TWO_START + 15);
         
         lcd_write_int(fader_updates, 6, LCD_LINE_TWO_START + 10);
-    }
+    }*/
     
     // Check for new packets
-//    network_service();
+    network_service();
     
     // Update outputs
     shift_out();

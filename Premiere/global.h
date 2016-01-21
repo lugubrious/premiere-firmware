@@ -21,6 +21,8 @@
 // MARK: Global variables
 extern volatile uint32_t millis; // Tracks the number of milliseconds elapsed since initilization
 
+extern volatile uint8_t adc_values[8];
+
 #endif /* global_h */
 
 

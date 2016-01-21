@@ -115,6 +115,14 @@
 
 #define NUM_KEYS            21
 
+/*
+    S1      S2      S3      S4
+    7       8       9       CLEAR
+    4       5       6       AND
+    1       2       3       EXCEPT
+    THRU    0       AT      ENTER
+ */
+
 #define KEY_GO_DDR          DDRB
 #define KEY_GO_PORT         PORTB
 #define KEY_GO_PIN          PINB

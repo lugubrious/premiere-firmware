@@ -61,7 +61,7 @@
 /// The size of the UDP application table (= how many ports can be listened on at the same time)
 #	define UDP_APPLICATION_TABLE_SIZE 1
 /// The size of the UDP table (= how many UDP connections can be held at the same time)
-#	define UDP_TABLE_SIZE 2
+#	define UDP_TABLE_SIZE 1
 #endif
 
 /// If defined, TCP will be implemented
@@ -78,7 +78,7 @@
 //#define IMPLEMENT_DNS
 
 /// If defined, DHCP will be implemented
-#define IMPLEMENT_DHCP
+//#define IMPLEMENT_DHCP
 
 /// If defined, NTP time synchronization will be implemented
 //#define IMPLEMENT_NTP

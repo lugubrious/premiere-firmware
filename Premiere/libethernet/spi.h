@@ -33,6 +33,16 @@ extern "C"
 {
 #endif //__cplusplus
 
+/**
+ * Initializes the SPI bus
+ * @remark This function must be implemented by the user!
+ * @param Port The PORT register for the pins
+ * @param DDR The DDR register for the pins
+ * @param SCK The offset for the SCK pin
+ * @param MISO The offset for the MISO pin
+ * @param MOSI The offset for the MOSI pin
+ * @param SS The offset for the SS pin
+ */
 extern void spi_initialise(volatile uint8_t* Port, volatile uint8_t* DDR, uint8_t SCK, uint8_t MISO, uint8_t MOSI, uint8_t SS);
     
 /**
