@@ -13,7 +13,7 @@
 #define Shift_h
 
 // MARK: Constants
-#define SHIFT_IN_NUM_REGISTERS  1
+#define SHIFT_IN_NUM_REGISTERS 3
 #define SHIFT_OUT_NUM_REGISTERS 2
 
 // MARK: Variable Declerations
@@ -39,8 +39,8 @@ extern uint8_t shift_in(void);
 Shift in Bit Order:
     Register:  1       2       3
     Pin:       abcdefghabcdefghabcdefgh
-    Bit:       222211111111110000000000
-               321098765432109876543210
+    Bit:       000000001111110022221111
+               765432105432109832109876
 */
 
 /*

@@ -175,6 +175,7 @@ uint32_t get_keys () {
         output |= ((uint32_t)1<<KEY_F2_ID);
     }
     if (!(shift_in_buffer & ((uint32_t)1<<KEY_F1_ID))) {
+//        shift_out_buffer ^= (1<<LED_EXCEPT_ID);
         output |= ((uint32_t)1<<KEY_F1_ID);
     }
     if (!(shift_in_buffer & ((uint32_t)1<<KEY_9_ID))) {
@@ -205,6 +206,7 @@ uint32_t get_keys () {
         output |= ((uint32_t)1<<KEY_1_ID);
     }
     if (!(shift_in_buffer & ((uint32_t)1<<KEY_0_ID))) {
+//        shift_out_buffer ^= (1<<LED_EXCEPT_ID);
         output |= ((uint32_t)1<<KEY_0_ID);
     }
     return output;

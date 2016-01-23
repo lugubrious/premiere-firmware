@@ -11,6 +11,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#include "shift.h"
+
 // MARK: Enum Definitions
 typedef enum {DISABLED, BREAK, STARTBYTE, SLOTS, IDLE} stage;
 // DISABLED:        DMX not being transmitted
@@ -37,10 +39,10 @@ void dmxInit_universe_one(void) {
     // USART configuration
     UBRR0H = 0;                                     // Set baud rate to 76.8kbaud (at 16mhz clock)
     UBRR0L = 12;
-    UCSR0B = (1<<RXEN0)|(1<<TXCIE0);                // Enable transmitter only, TX done interupt enabled
+    UCSR0B = (1<<TXEN0)|(1<<TXCIE0);                // Enable transmitter only, TX done interupt enabled
     UCSR0C = (1<<USBS0)|(1<<UCSZ00)|(1<<UCSZ01);    // Set frame format: 8data, 2stop bit
     
-    dmxOneStage = DISABLED;
+    dmxOneStage = IDLE;
 }
 
 void dmx_init_universe_two(void) {
@@ -49,20 +51,22 @@ void dmx_init_universe_two(void) {
     // USART configuration
     UBRR1H = 0;                                     // Set baud rate to 76.8kbaud (at 16mhz clock)
     UBRR1L = 12;
-    UCSR1B = (1<<RXEN1)|(1<<TXCIE1);                // Enable transmitter only, TX done interupt enabled
+    UCSR1B = (1<<TXEN1)|(1<<TXCIE1);                // Enable transmitter only, TX done interupt enabled
     UCSR1C = (1<<USBS1)|(1<<UCSZ10)|(1<<UCSZ11);    // Set frame format: 8data, 2stop bit
     
-    dmxTwoStage = DISABLED;
+    dmxTwoStage = IDLE;
 }
 
 void dmx_service (void) {
     // Universe One
     if ((dmxOneStage == IDLE) && ((millis - dmxOneLastFrame) > DMX_MAX_FRAME_FREQUENCY)) {
         dmx_one_start_frame();
+        dmxOneLastFrame = millis;
     }
     // Universe Two
     if ((dmxTwoStage == IDLE) && ((millis - dmxTwoLastFrame) > DMX_MAX_FRAME_FREQUENCY)) {
         dmx_two_start_frame();
+        dmxTwoLastFrame = millis;
     }
 }
 
@@ -118,15 +122,15 @@ ISR (USART0_TX_vect) {                              // Transmit finished on USAR
         case DISABLED:                              // This shouldn't happen
             break;
         case BREAK:                                 // The break is finished sending
+            dmxOneStage = STARTBYTE;
             UBRR0H = 0;                             // Set baud rate (250Kbaud at 16mhz clock)
             UBRR0L = 3;
             UDR0 = DMX_START_BYTE;                  // Send start byte
-            dmxOneStage = STARTBYTE;
             break;
         case STARTBYTE:                             // The start byte is finished sending
             dmxOneStage = SLOTS;
-            UDR0 = dmx_universe_one[0];             // Sent first Slot
             currentSlot = 1;                        // get ready to send next slot
+            UDR0 = dmx_universe_one[0];             // Sent first Slot
             break;
         case SLOTS:                                 // The latest slot is finished sending
             if (currentSlot < DMX_NUM_SLOTS) {      // if there are slots left to send
@@ -147,15 +151,15 @@ ISR (USART1_TX_vect) {                              // Transmit finished on USAR
         case DISABLED:                              // This shouldn't happen
             break;
         case BREAK:                                 // The break is finished sending
+            dmxTwoStage = STARTBYTE;
             UBRR1H = 0;                             // Set baud rate (250Kbaud at 16mhz clock)
             UBRR1L = 3;
             UDR1 = DMX_START_BYTE;                  // Send start byte
-            dmxTwoStage = STARTBYTE;
             break;
         case STARTBYTE:                             // The start byte is finished sending
             dmxTwoStage = SLOTS;
-            UDR1 = dmx_universe_two[0];             // Sent first Slot
             currentSlot = 1;                        // get ready to send next slot
+            UDR1 = dmx_universe_two[0];             // Sent first Slot
             break;
         case SLOTS:                                 // The latest slot is finished sending
             if (currentSlot < DMX_NUM_SLOTS) {      // if there are slots left to send

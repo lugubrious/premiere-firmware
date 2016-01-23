@@ -107,13 +107,48 @@
 #define KEY_THRU_ID         9
 #define KEY_EXCEPT_ID       8
 
-#define KEY_AND_ID          20
-#define KEY_AT_ID           19
-#define KEY_CLEAR_ID        18
-#define KEY_ENTER_ID        17
-#define KEY_BACK_ID         16
+#define KEY_AND_ID          20//23
+#define KEY_AT_ID           21//22
+#define KEY_CLEAR_ID        22//21
+#define KEY_ENTER_ID        23//20
+#define KEY_BACK_ID         19//19
 
-#define NUM_KEYS            21
+#define NUM_KEYS            32
+
+/*
+    7 (0)       - 7
+    6 (1)       - 6
+    5 (0)       - 5
+    4 (1)       - 4
+    3 (0)       - 3
+    2 (1)       - 2
+    1 (0)       - 1
+    0 (1)       - 0
+    8 (-)       - 8
+    9 (<)       - 9
+    10 (F4)     - 10
+    11 (F3)     - 11
+    12 (F2)     - 12
+    13 (F1)     - 13
+    14 (9)      - 14
+    15 (8)      - 15
+    16 (-)      - -
+    17 (-)      - -
+    18 (-)      - -
+    19 (Back)   - 15
+    20 (*)      - 15
+    21 (Clear)  - 15
+    22 (@)      - 15
+    23 (+)      - 15
+ */
+
+/*
+    +       - 3D
+    @       - 3C
+    Clear   - 3B
+    *       - 3A
+    Back    - 3
+ */
 
 /*
     S1      S2      S3      S4
@@ -127,13 +162,13 @@
 #define KEY_GO_PORT         PORTB
 #define KEY_GO_PIN          PINB
 #define KEY_GO_NUM          PINB2
-#define KEY_GO_ID           (NUM_KEYS+1)
+#define KEY_GO_ID           16
 
 #define KEY_STOP_DDR        DDRD
 #define KEY_STOP_PORT       PORTD
 #define KEY_STOP_PIN        PIND
 #define KEY_STOP_NUM        PIND2
-#define KEY_STOP_ID         (NUM_KEYS+0)
+#define KEY_STOP_ID         17
 
 #define PLAYBACK_START      NUM_KEYS
 #define PLAYBACK_NUM        2

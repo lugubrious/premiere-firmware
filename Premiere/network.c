@@ -40,40 +40,42 @@ static bool dhcp_avaliable = true;
 #endif // IMPLEMENT_DHCP
 
 static uint32_t lastEthernetTick;
-static TCPSocket connection;
+static UDPSocket connection;
 
 // MARK: Function declarations
-static void _process_get(TCPSocket socket, uint8_t id, uint16_t qualifier);
-static void _process_set (TCPSocket socket, const uint8_t* buffer, size_t Length);
-static void _send_ping_response (TCPSocket socket, uint8_t byte);
+static void _process_get(UDPSocket socket, uint8_t id, uint16_t qualifier);
+static void _process_set (UDPSocket socket, const uint8_t* buffer, size_t Length);
+static void _send_ping_response (UDPSocket socket, uint8_t byte);
 
 //MARK: Internal Function Definitions
-void network_handle_UDP_connect (UDPSocket Socket, uint32_t RemoteIP) {
+/*void network_handle_TCP_connect (TCPSocket Socket, uint32_t RemoteIP) {
     
-}
-
-void network_handle_UDP_disconnect (UDPSocket Socket) {
-    
-}
-
-void network_handle_UDP_packet (UDPSocket Socket, const uint8_t* Buffer, size_t Length) {
-    
-}
-
-
-void network_handle_TCP_connect (TCPSocket Socket, uint32_t RemoteIP) {
-    connection = Socket;
-    shift_out_buffer |= (1<<LED_EXCEPT_ID);
-    shift_out();
 }
 
 void network_handle_TCP_disconnect (TCPSocket Socket) {
-    connection = INVALID_TCP_SOCKET;
+    
+}
+
+void network_handle_TCP_packet (TCPSocket Socket, const uint8_t* Buffer, size_t Length) {
+    
+}*/
+
+
+void network_handle_UDP_connect (UDPSocket Socket, uint32_t RemoteIP) {
+    connection = Socket;
+    shift_out_buffer |= (1<<LED_EXCEPT_ID);
+    shift_out();
+    
+    _send_ping_response(Socket, 0);
+}
+
+void network_handle_UDP_disconnect (UDPSocket Socket) {
+    connection = INVALID_UDP_SOCKET;
     shift_out_buffer &= !(1<<LED_EXCEPT_ID);
     shift_out();
 }
 
-void network_handle_TCP_packet (TCPSocket Socket, const uint8_t* Buffer, size_t Length) {
+void network_handle_UDP_packet (UDPSocket Socket, const uint8_t* Buffer, size_t Length) {
     lcd_write_string((char*)Buffer, LCD_LINE_TWO_START);
     lcd_write_int(Length, 2, LCD_LINE_TWO_START+14);
     
@@ -106,21 +108,22 @@ void network_handle_TCP_packet (TCPSocket Socket, const uint8_t* Buffer, size_t 
     }
 }
 
-static void _send_ping_response (TCPSocket socket, uint8_t byte) {
+static void _send_ping_response (UDPSocket socket, uint8_t byte) {
     uint8_t* buf;
     size_t buf_size, packet_length = 2;
-    tcp_start_packet(socket, &buf, &buf_size);
+    udp_start_packet(socket, &buf, &buf_size);
     
     buf[0] = 0b00000001;
     buf[1] = byte;
     
-    tcp_send(packet_length);
+    udp_send(packet_length);
 }
 
-static void _process_get (TCPSocket socket, uint8_t id, uint16_t qualifier) {
+static void _process_get (UDPSocket socket, uint8_t id, uint16_t qualifier) {
     uint8_t* buf;
     size_t buf_size, packet_length = 0;
-    tcp_start_packet(socket, &buf, &buf_size);
+    udp_start_packet(socket, &buf, &buf_size);
+    
     
     buf[0] = 2; //set
     buf[1] = id;
@@ -154,14 +157,17 @@ static void _process_get (TCPSocket socket, uint8_t id, uint16_t qualifier) {
             break;
     }
     
-    tcp_send(packet_length);
+    udp_send(packet_length);
 }
 
-static void _process_set (TCPSocket socket, const uint8_t* buffer, size_t length) {
+static void _process_set (UDPSocket socket, const uint8_t* buffer, size_t length) {
     switch (buffer[1]) {
         case 0b00000000: //info string
             break;
         case 0b00000001: { //dmx value
+            shift_out_buffer |= (1<<LED_AND_ID);
+            shift_out();
+            
             uint16_t address = (buffer[2] << 8) | buffer[3];
             
             volatile uint8_t* universe = (address < 512) ? dmx_universe_one : dmx_universe_two;
@@ -176,6 +182,47 @@ static void _process_set (TCPSocket socket, const uint8_t* buffer, size_t length
         case 0b00000011: // Button events
             break;
     }
+}
+
+int network_push_adc_update (const uint8_t* values) {
+    if (connection == INVALID_UDP_SOCKET) {
+        return -1;
+    }
+    
+    uint8_t* buf;
+    size_t buf_size, packet_length = 10;
+    udp_start_packet(connection, &buf, &buf_size);
+    
+    buf[0] = 0b00000010; //Set
+    buf[1] = 0b00000010; //ADC values
+    
+    memcpy(buf+2, values, 8);
+    
+    udp_send(packet_length);
+    
+    return 0;
+}
+
+int network_push_buttons_update (uint32_t button_values) {
+    if (connection == INVALID_UDP_SOCKET) {
+        return -1;
+    }
+    
+    uint8_t* buf;
+    size_t buf_size, packet_length = 6;
+    udp_start_packet(connection, &buf, &buf_size);
+    
+    buf[0] = 0b00000010; //Set
+    buf[1] = 0b00000011; //Button events
+    
+    buf[2] = (button_values>>24) & 0xFF;
+    buf[3] = (button_values>>16) & 0xFF;
+    buf[4] = (button_values>>8) & 0xFF;
+    buf[5] = button_values & 0xFF;
+    
+    udp_send(packet_length);
+    
+    return 0;
 }
 
 //MARK: External Function Definitions
@@ -212,8 +259,8 @@ void network_init(void) {
     #	endif //IMPLEMENT_DHCP
     #endif //IMPLEMENT_DNS
     
-//    udp_open_port(6001, 5000, &network_handle_UDP_connect, &network_handle_UDP_disconnect, &network_handle_UDP_packet);
-    tcp_open_port(6562, 5000, &network_handle_TCP_connect, &network_handle_TCP_disconnect, &network_handle_TCP_packet);
+    udp_open_port(6562, 5000, &network_handle_UDP_connect, &network_handle_UDP_disconnect, &network_handle_UDP_packet);
+//    tcp_open_port(6562, 5000, &network_handle_TCP_connect, &network_handle_TCP_disconnect, &network_handle_TCP_packet);
 }
 
 void network_deinit (void) {

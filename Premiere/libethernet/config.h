@@ -65,7 +65,7 @@
 #endif
 
 /// If defined, TCP will be implemented
-#define IMPLEMENT_TCP
+//#define IMPLEMENT_TCP
 #ifdef IMPLEMENT_TCP
 /// The size of the TCP application table (= how many ports can be listened on at the same time)
 #	define TCP_APPLICATION_TABLE_SIZE 1

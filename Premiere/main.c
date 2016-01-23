@@ -113,15 +113,19 @@ int main(void) {
     
     sei();                                          // Enable interupts
     
+    for (int i = 0; i < 1024; i++) {
+        dmx_set_dimmer(i, (i%2 == 0) ? 255 : 10);
+    }
+    
     dmx_one_start_frame();                          // Start sending frames on universe one
     dmx_two_start_frame();                          // Start sending frames on universe two
     
     ADCSRA |= (1<<ADSC);                            // Start first ADC conversion
     
 #ifdef DEBUG_MODE
-    shift_out_buffer = 0b1111111111111111;          // Test the LEDs
-    shift_out();                                    // Make sure the shift out regs have a defined state
-    shift_out_buffer = 0;                           // Next time shift out is called outputs return to off
+//    shift_out_buffer = 0b1111111111111111;          // Test the LEDs
+//    shift_out();                                    // Make sure the shift out regs have a defined state
+//    shift_out_buffer = 0;                           // Next time shift out is called outputs return to off
 # else
     shift_out();                                    // Clear the shift registers (they start in an undifined state, so some LEDs are probably on)
 #endif
@@ -129,8 +133,6 @@ int main(void) {
 //    struct Animation loading_animation = animation_create_new(ANIMATION_LOADING_LENGTH, ANIMATION_LOADING_FRAMERATE, LCD_LINE_ONE_START, ANIMATION_LOADING_CHARS);
 //    animation_load(loading_animation, 0);
 //    animation_start(0);
-    
-    shift_out();
     
     lcd_write_string("Network Setup...", LCD_LINE_ONE_START);
     
@@ -159,10 +161,10 @@ int main(void) {
 }
 
 void main_loop(void) {
-    if ((millis - last_beat) >= 1000) {
-        last_beat = millis;
-        shift_out_buffer ^= (1<<LED_BUMP_EIGHT_ID);
-    }
+//    if ((millis - last_beat) >= 1000) {
+//        last_beat = millis;
+//        shift_out_buffer ^= (1<<LED_BUMP_TWO_ID);
+//    }
 
     // Run main loop funcions for various systems
     dmx_service();
@@ -173,33 +175,47 @@ void main_loop(void) {
         buttons_sections_dirty |= (1<<BUTTON_KEYS_DIRTY);
     }
     button_service();
-    
-    if (buttons_keypad_dirty & ((uint32_t)1<<KEY_1_ID)) {
-//        shift_out_buffer ^= (1<<15);
-        buttons_keypad_dirty &= ~((uint32_t)1<<KEY_1_ID);
+/*
+    if (buttons_keypad_dirty & ((uint32_t)1<<KEY_AND_ID)) {
+        shift_out_buffer ^= (1<<LED_THRU_ID);
+        buttons_keypad_dirty &= ~((uint32_t)1<<KEY_AND_ID);
     }
     
-    if (buttons_keypad_dirty & ((uint32_t)1<<KEY_GO_ID)) {
-//        shift_out_buffer ^= (1<<14);
-        buttons_keypad_dirty &= ~((uint32_t)1<<KEY_GO_ID);
+    if (buttons_keypad_dirty & ((uint32_t)1<<KEY_AT_ID)) {
+        shift_out_buffer ^= (1<<LED_AT_ID);
+        buttons_keypad_dirty &= ~((uint32_t)1<<KEY_AT_ID);
     }
-
-    if (buttons_bump_dirty & ((uint32_t)1<<BUMP_ONE_ID)) {
-//        shift_out_buffer ^= (1<<13);
-        buttons_bump_dirty &= ~((uint32_t)1<<BUMP_ONE_ID);
-    }
+    
+    if (buttons_keypad_dirty & ((uint32_t)1<<KEY_CLEAR_ID)) {
+        shift_out_buffer ^= (1<<LED_EXCEPT_ID);
+        buttons_keypad_dirty &= ~((uint32_t)1<<KEY_CLEAR_ID);
+    }*/
+    
+//    if (buttons_keypad_dirty != 0) {
+//        shift_out_buffer |= (1<<LED_AND_ID);
+//        buttons_keypad_dirty = 0;
+//    } else {
+//        shift_out_buffer &= ~(1<<LED_AND_ID);
+//    }
     
     // Check for dirty flags/new input and take any needed actions
-    /*uint8_t adc_is_dirty = adcs_are_dirty();
-    static unsigned int fader_updates;
-
+    uint8_t adc_is_dirty = adcs_are_dirty();
+    if (adc_is_dirty != 0) {
+        network_push_adc_update(adc_values);
+    }
     
-    if (adc_is_dirty & (1<<7)) {
-        fader_updates++;
-        lcd_write_int(adc_values[7], 3, LCD_LINE_TWO_START);
-        lcd_write_percentage(adc_values[7], LCD_LINE_TWO_START + 15);
-        
-        lcd_write_int(fader_updates, 6, LCD_LINE_TWO_START + 10);
+    if ((buttons_keypad_dirty != 0) || (buttons_bump_dirty != 0)) {
+        network_push_buttons_update(buttons_keypad_dirty | ((uint32_t)buttons_bump_dirty << 24));
+        buttons_keypad_dirty = 0;
+        buttons_bump_dirty = 0;
+    }
+
+/*    for (uint8_t i = 0; i < 8; i++) {
+        if (adc_is_dirty & (1<<i)) {
+//            fader_updates++;
+//            lcd_write_int(adc_values[i], 3, LCD_LINE_TWO_START);
+            lcd_write_percentage(adc_values[i], LCD_LINE_TWO_START + 7 + i);
+        }
     }*/
     
     // Check for new packets
