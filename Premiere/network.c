@@ -168,12 +168,17 @@ static void _process_set (UDPSocket socket, const uint8_t* buffer, size_t length
             shift_out_buffer |= (1<<LED_AND_ID);
             shift_out();
             
-            uint16_t address = (buffer[2] << 8) | buffer[3];
+            uint16_t address = (buffer[2] << 8) | buffer[3], num_slots = length - 4;
             
-            volatile uint8_t* universe = (address < 512) ? dmx_universe_one : dmx_universe_two;
-            uint8_t dimmer = (address < 512) ? address : address - 512;
+            if (length == 1) {
+                dmx_set_dimmer(address, buffer[4]);
+            } else {
+                volatile uint8_t* universe = (address < 512) ? dmx_universe_one : dmx_universe_two;
+                uint8_t dimmer = (address < 512) ? address : address - 512;
+                lcd_write_int(address, 3, LCD_LINE_TWO_START + 10);
             
-            memcpy(universe, buffer + 4, fmin(length - 4, 511 - dimmer));
+                memcpy(universe, buffer + 4, fmin(num_slots, 511 - dimmer));
+            }
             
             break;
         }

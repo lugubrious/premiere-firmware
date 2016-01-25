@@ -6,6 +6,8 @@
 //  Copyright © 2015 Samuel Dewan. All rights reserved.
 //
 
+// ! Not really impelmented !
+
 #include "fade.h"
 
 #include "global.h"
@@ -28,7 +30,7 @@ static uint16_t fades_loaded;                               // Tracks which fade
 
 // MARK: Function definitions
 void fade_load(uint8_t index, uint16_t channel, uint8_t target, uint16_t time) {
-//    struct Fade fade;
+    struct Fade fade;
     
     uint8_t initial = dmx_get_dimmer(channel), steps;
     

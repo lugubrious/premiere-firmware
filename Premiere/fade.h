@@ -6,6 +6,8 @@
 //  Copyright © 2015 Samuel Dewan. All rights reserved.
 //
 
+// ! Not really impelmented !
+
 #ifndef fade_h
 #define fade_h
 

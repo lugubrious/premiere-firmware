@@ -29,7 +29,7 @@ void main_loop(void);
 uint8_t adcs_are_dirty(void);
 
 // MARK: Variables Definitions
-volatile uint32_t millis, last_beat;
+volatile uint32_t millis;
 
 static volatile uint8_t adc_current_chan;
 static volatile uint8_t prev_adc_values[8];
@@ -99,9 +99,6 @@ int main(void) {
     cli();                                          // Clear(disable) interupts
     
     init_io();
-//    BUMP_EIGHT_DDR |= (1<<BUMP_EIGHT_NUM);
-//    BUMP_EIGHT_PORT |= (1<<BUMP_EIGHT_NUM);
-//    BUMP_SEVEN_DDR |= (1<<BUMP_SEVEN_NUM);
 
     init_timers();
     init_adc();
@@ -112,10 +109,29 @@ int main(void) {
     lcd_init();                                     // Initilize the lcd with the default settings in lcd.c (which are conveniantly the settings we want)
     
     sei();                                          // Enable interupts
-    
-    for (int i = 0; i < 1024; i++) {
-        dmx_set_dimmer(i, (i%2 == 0) ? 255 : 10);
+
+    /*
+    // Make sure stage doesn't go black
+    for (int i = 58; i < 74; i++) {
+        dmx_set_dimmer(i, 255);
     }
+    
+    dmx_set_dimmer(94, 255);
+    dmx_set_dimmer(90, 255);
+    dmx_set_dimmer(86, 255);
+    dmx_set_dimmer(85, 255);
+    dmx_set_dimmer(82, 255);
+    dmx_set_dimmer(77, 255);
+    dmx_set_dimmer(12, 255);
+    
+    for (int i = 0; i < 11; i++) {
+        dmx_set_dimmer(i, 255);
+    }
+    
+    dmx_set_dimmer(12, 255);
+    dmx_set_dimmer(15, 255);
+    dmx_set_dimmer(18, 255);
+    dmx_set_dimmer(23, 255);*/
     
     dmx_one_start_frame();                          // Start sending frames on universe one
     dmx_two_start_frame();                          // Start sending frames on universe two
@@ -123,9 +139,9 @@ int main(void) {
     ADCSRA |= (1<<ADSC);                            // Start first ADC conversion
     
 #ifdef DEBUG_MODE
-//    shift_out_buffer = 0b1111111111111111;          // Test the LEDs
-//    shift_out();                                    // Make sure the shift out regs have a defined state
-//    shift_out_buffer = 0;                           // Next time shift out is called outputs return to off
+    shift_out_buffer = 0b1111111111111111;          // Test the LEDs
+    shift_out();                                    // Make sure the shift out regs have a defined state
+    shift_out_buffer = 0;                           // Next time shift out is called outputs return to off
 # else
     shift_out();                                    // Clear the shift registers (they start in an undifined state, so some LEDs are probably on)
 #endif
@@ -161,11 +177,6 @@ int main(void) {
 }
 
 void main_loop(void) {
-//    if ((millis - last_beat) >= 1000) {
-//        last_beat = millis;
-//        shift_out_buffer ^= (1<<LED_BUMP_TWO_ID);
-//    }
-
     // Run main loop funcions for various systems
     dmx_service();
     animation_service();
@@ -175,28 +186,7 @@ void main_loop(void) {
         buttons_sections_dirty |= (1<<BUTTON_KEYS_DIRTY);
     }
     button_service();
-/*
-    if (buttons_keypad_dirty & ((uint32_t)1<<KEY_AND_ID)) {
-        shift_out_buffer ^= (1<<LED_THRU_ID);
-        buttons_keypad_dirty &= ~((uint32_t)1<<KEY_AND_ID);
-    }
-    
-    if (buttons_keypad_dirty & ((uint32_t)1<<KEY_AT_ID)) {
-        shift_out_buffer ^= (1<<LED_AT_ID);
-        buttons_keypad_dirty &= ~((uint32_t)1<<KEY_AT_ID);
-    }
-    
-    if (buttons_keypad_dirty & ((uint32_t)1<<KEY_CLEAR_ID)) {
-        shift_out_buffer ^= (1<<LED_EXCEPT_ID);
-        buttons_keypad_dirty &= ~((uint32_t)1<<KEY_CLEAR_ID);
-    }*/
-    
-//    if (buttons_keypad_dirty != 0) {
-//        shift_out_buffer |= (1<<LED_AND_ID);
-//        buttons_keypad_dirty = 0;
-//    } else {
-//        shift_out_buffer &= ~(1<<LED_AND_ID);
-//    }
+
     
     // Check for dirty flags/new input and take any needed actions
     uint8_t adc_is_dirty = adcs_are_dirty();
@@ -210,12 +200,36 @@ void main_loop(void) {
         buttons_bump_dirty = 0;
     }
 
-/*    for (uint8_t i = 0; i < 8; i++) {
-        if (adc_is_dirty & (1<<i)) {
-//            fader_updates++;
-//            lcd_write_int(adc_values[i], 3, LCD_LINE_TWO_START);
-            lcd_write_percentage(adc_values[i], LCD_LINE_TWO_START + 7 + i);
-        }
+ /*  Hard coded tests...
+    if (adc_is_dirty & (1<<1)) {
+        dmx_set_dimmer(512, adc_values[1]);
+        adc_is_dirty &= ~(1<<1);
+    }
+    
+    if (adc_is_dirty & (1<<2)) {
+        dmx_set_dimmer(513, adc_values[2]);
+        adc_is_dirty &= ~(1<<2);
+    }
+    
+    if (adc_is_dirty & (1<<3)) {
+        dmx_set_dimmer(514, adc_values[3]);
+        adc_is_dirty &= ~(1<<3);
+    }
+    
+    if (adc_is_dirty & (1<<4)) {
+        dmx_set_dimmer(515, adc_values[4]);
+        adc_is_dirty &= ~(1<<4);
+    }
+    
+    if (adc_is_dirty & (1<<6)) {
+        dmx_set_dimmer(96, adc_values[6]);
+        adc_is_dirty &= ~(1<<6);
+    }
+    
+    if (adc_is_dirty & (1<<7)) {
+        dmx_set_dimmer(95, adc_values[7]);
+        dmx_set_dimmer(39, adc_values[7]);
+        adc_is_dirty &= ~(1<<7);
     }*/
     
     // Check for new packets
@@ -223,10 +237,6 @@ void main_loop(void) {
     
     // Update outputs
     shift_out();
-    
-//    static unsigned int loops;
-//    loops++;
-//    lcd_write_int(loops / (millis / 1000), 6, LCD_LINE_TWO_START + 10);
 }
 
 uint8_t adcs_are_dirty (void) {
