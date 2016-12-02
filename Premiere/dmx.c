@@ -33,7 +33,7 @@ static volatile stage dmxOneStage, dmxTwoStage;     // DMX stages
 
 // Mark: Function Definitions
 
-void dmxInit_universe_one(void) {
+void dmx_init_universe_one(void) {
     // It is assumed that the global interupt flag is cleared when this function runs
     
     // USART configuration

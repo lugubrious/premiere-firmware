@@ -49,7 +49,7 @@ uint8_t shift_in (void) {
     // Get data
     for (int i = 0; i < (8 * SHIFT_IN_NUM_REGISTERS); i++) {    // Iterate through bits
         SHIFT_IN_CLK_PORT |= (1<<SHIFT_IN_CLK_NUM);             // Pull CLK high
-        _NOP();                                                 // Wait a bit so register can settle, a single cycle should be sufficient since the register can work at clock speeds of up to at least 25MHz. The _NOP() macro guarantees a NOP instruction that will not be optomized out.
+        _NOP();         // Wait a bit so register can settle, a single cycle should be sufficient since the register can work at clock speeds of up to at least 25MHz. The _NOP() macro guarantees a NOP instruction that will not be optomized out.
         if ((SHIFT_IN_DATA_PIN & (1<<SHIFT_IN_DATA_NUM))) { // Update the relivant bit
             shift_in_buffer |= (1<<i);
         } else {

@@ -44,7 +44,7 @@ extern void dmx_service (void);
 /**
  * Initilize universe one
  */
-extern void dmxInit_universe_one(void);
+extern void dmx_init_universe_one(void);
 
 /**
  * Initilize universe two

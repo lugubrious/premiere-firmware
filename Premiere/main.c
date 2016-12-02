@@ -28,7 +28,7 @@
 void main_loop(void);
 uint8_t adcs_are_dirty(void);
 
-// MARK: Variables Definitions
+// MARK: Variable Definitions
 volatile uint32_t millis;
 
 static volatile uint8_t adc_current_chan;
@@ -103,7 +103,7 @@ int main(void) {
     init_timers();
     init_adc();
     
-    dmxInit_universe_one();                         // Initialize universe one
+    dmx_init_universe_one();                         // Initialize universe one
     dmx_init_universe_two();                        // Initialize universe two
     
     lcd_init();                                     // Initilize the lcd with the default settings in lcd.c (which are conveniantly the settings we want)
