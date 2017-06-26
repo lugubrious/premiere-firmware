@@ -13,6 +13,8 @@
 # Sander Pool
 # Frederik Rouleau
 #
+# Modified to support C++ by Samuel Dewan
+#
 #----------------------------------------------------------------------------
 # On command line:
 #

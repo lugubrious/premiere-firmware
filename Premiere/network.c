@@ -233,7 +233,7 @@ int network_push_buttons_update (uint32_t button_values) {
 //MARK: External Function Definitions
 void network_init(void) {
     spi_initialise(&PORTB, &DDRB, PB7, PB6, PB5, PB4);
-    enc28j60_initialise(sample_MACAddress, true);
+    enc28j60_initialise(sample_MACAddress, true);D
     
     lcd_write_char('_', LCD_LINE_ONE_START + 15);
     

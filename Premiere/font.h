@@ -27,7 +27,7 @@ const uint8_t FONT[8][8] = {
 
 const uint8_t FONT[8][8] = {
     {0,16,8,4,2,1,0, 0},        // Char 1: Backslash '\'
-    
+
     {0, 0, 0, 0, 0, 0, 0,31},   // Char 2: Bottom row filled
     {0, 0, 0, 0, 0, 0,31,31},   // Char 3: Two rows filed
     {0, 0, 0, 0, 0,31,31,31},   // Char 4: Three rows filed
